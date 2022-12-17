@@ -10,19 +10,26 @@ export default function Home({ events }) {
       {events.length === 0 && <h3>No events to show</h3>}
 
       {events.map((evt) => (
-        <EventItem kry={evt.id} evt={evt} />
+        <EventItem kry={evt.uuid} evt={evt} />
       ))}
       {events.length > 0 && <Link href="/events">View All Events</Link>}
     </Layout>
   );
 }
 
+const serializer = (data) =>
+  data.map((item) => ({ uuid: item.id, ...item.attributes }));
+
 export async function getStaticProps() {
-  const res = await fetch(`${API_URL}/api/events`);
-  const events = await res.json();
+  const res = await fetch(
+    `${API_URL}/api/events?populate=*&_sort=date:ASC&pagination[pageSize]=3`
+  );
+  const { data } = await res.json();
+  console.log(data);
+  console.log(">>>>>>>", serializer(data));
   return {
     props: {
-      events: events.slice(0, 3),
+      events: serializer(data) || [],
       revalidate: 1,
     },
   };

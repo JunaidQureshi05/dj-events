@@ -15,12 +15,15 @@ export default function EventsPage({ events }) {
   );
 }
 
+const serializer = (data) =>
+  data.map((item) => ({ uuid: item.id, ...item.attributes }));
+
 export async function getStaticProps() {
-  const res = await fetch(`${API_URL}/api/events`);
-  const events = await res.json();
+  const res = await fetch(`${API_URL}/api/events?populate=*`);
+  const { data } = await res.json();
   return {
     props: {
-      events: events,
+      events: serializer(data) || [],
       revalidate: 1,
     },
   };
